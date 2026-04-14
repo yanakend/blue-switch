@@ -222,9 +222,11 @@ final class ConnectionManager: NetworkConnectionManaging {
       bluetoothStore.peripherals.forEach { peripheral in
         bluetoothStore.unregisterFromPC(peripheral)
       }
-      // このMacは非アクティブになった（どのデバイスがアクティブかは送信側が管理）
+      // このMacは非アクティブになった。送信側（相手Mac）がアクティブになる
       DispatchQueue.main.async {
-        NetworkDeviceStore.shared.activeDeviceID = "other"
+        if let sender = NetworkDeviceStore.shared.networkDevices.first {
+          NetworkDeviceStore.shared.activeDeviceID = sender.id
+        }
       }
       // Send success response
       send(message: DeviceCommand.operationSuccess.rawValue, to: connection)
