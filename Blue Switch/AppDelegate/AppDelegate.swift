@@ -77,6 +77,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     guard let device = sender.representedObject as? NetworkDevice else { return }
 
     bluetoothStore.peripherals.forEach { bluetoothStore.unregisterFromPC($0) }
+    networkStore.networkDevices.filter { $0.id != device.id }.forEach { other in
+      networkStore.executeCommand(.unregisterAll, to: other) { _ in }
+    }
     waitForDisconnection { [weak self] allDisconnected in
       guard let self = self else { return }
       if allDisconnected {
