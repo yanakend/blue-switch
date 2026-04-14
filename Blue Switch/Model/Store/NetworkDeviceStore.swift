@@ -205,7 +205,13 @@ extension NetworkDeviceStore {
       completion(false)
       return
     }
+    executeCommand(command, to: device, completion: completion)
+  }
 
+  /// Executes a command on a specific device
+  func executeCommand(
+    _ command: DeviceCommand, to device: NetworkDevice, completion: @escaping (Bool) -> Void
+  ) {
     let connection = NWConnection(
       host: NWEndpoint.Host(device.host),
       port: NWEndpoint.Port(integerLiteral: UInt16(device.port)),

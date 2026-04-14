@@ -51,8 +51,21 @@ final class MenuBarView: MenuBarPresentable {
   }
 
   private func addNetworkDeviceItems(to menu: NSMenu) {
+    let selfItem = NSMenuItem(
+      title: Host.current().localizedName ?? "This Mac",
+      action: #selector(AppDelegate.connectToSelf(_:)),
+      keyEquivalent: ""
+    )
+    menu.addItem(selfItem)
+
     for device in networkStore.networkDevices {
-      menu.addItem(NSMenuItem(title: device.name, action: nil, keyEquivalent: ""))
+      let item = NSMenuItem(
+        title: device.name,
+        action: #selector(AppDelegate.switchToDevice(_:)),
+        keyEquivalent: ""
+      )
+      item.representedObject = device
+      menu.addItem(item)
     }
   }
 

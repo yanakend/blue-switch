@@ -60,10 +60,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     guard let event = NSApp.currentEvent else { return }
 
     switch event.type {
-    case .rightMouseUp:
+    case .rightMouseUp, .leftMouseUp:
       showMenu()
-    case .leftMouseUp:
-      handleLeftClick()
     default:
       break
     }
@@ -71,6 +69,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   private func showMenu() {
     MenuBarView().showMenu(statusItem: statusItem)
+  }
+
+  // MARK: - Device Switching
+
+  @objc func switchToDevice(_ sender: NSMenuItem) {
+    guard let device = sender.representedObject as? NetworkDevice else { return }
+
+    bluetoothStore.peripherals.forEach { bluetoothStore.unregisterFromPC($0) }
+    waitForDisconnection { [weak self] allDisconnected in
+      guard let self = self else { return }
+      if allDisconnected {
+        self.networkStore.executeCommand(.connectAll, to: device) { success in
+          if !success {
+            NotificationManager.showNotification(
+              title: "Error",
+              body: "Connection process failed on \(device.name)"
+            )
+          }
+        }
+      } else {
+        NotificationManager.showNotification(
+          title: "Error",
+          body: "Failed to disconnect devices"
+        )
+      }
+    }
+  }
+
+  @objc func connectToSelf(_ sender: Any?) {
+    networkStore.networkDevices.forEach { device in
+      networkStore.executeCommand(.unregisterAll, to: device) { _ in }
+    }
+    bluetoothStore.peripherals.forEach { bluetoothStore.connectPeripheral($0) }
   }
 
   private func handleLeftClick() {
