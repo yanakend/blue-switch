@@ -76,6 +76,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func switchToDevice(_ sender: NSMenuItem) {
     guard let device = sender.representedObject as? NetworkDevice else { return }
 
+    networkStore.activeDeviceID = device.id  // 即座に反映
+
     bluetoothStore.peripherals.forEach { bluetoothStore.unregisterFromPC($0) }
     networkStore.networkDevices.filter { $0.id != device.id }.forEach { other in
       networkStore.executeCommand(.unregisterAll, to: other) { _ in }
@@ -84,9 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       guard let self = self else { return }
       if allDisconnected {
         self.networkStore.executeCommand(.connectAll, to: device) { success in
-          if success {
-            self.networkStore.activeDeviceID = device.id
-          } else {
+          if !success {
             NotificationManager.showNotification(
               title: "Error",
               body: "Connection process failed on \(device.name)"
@@ -103,11 +103,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @objc func connectToSelf(_ sender: Any?) {
+    networkStore.activeDeviceID = ""  // 即座に反映
+
     networkStore.networkDevices.forEach { device in
       networkStore.executeCommand(.unregisterAll, to: device) { _ in }
     }
     bluetoothStore.peripherals.forEach { bluetoothStore.connectPeripheral($0) }
-    networkStore.activeDeviceID = ""
   }
 
   private func handleLeftClick() {
