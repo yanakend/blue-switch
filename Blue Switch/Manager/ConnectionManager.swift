@@ -210,6 +210,10 @@ final class ConnectionManager: NetworkConnectionManaging {
       bluetoothStore.peripherals.forEach { peripheral in
         bluetoothStore.connectPeripheral(peripheral)
       }
+      // このMacがアクティブになった
+      DispatchQueue.main.async {
+        NetworkDeviceStore.shared.activeDeviceID = ""
+      }
       // Send success response
       send(message: DeviceCommand.operationSuccess.rawValue, to: connection)
 
@@ -217,6 +221,10 @@ final class ConnectionManager: NetworkConnectionManaging {
       // Execute device disconnection
       bluetoothStore.peripherals.forEach { peripheral in
         bluetoothStore.unregisterFromPC(peripheral)
+      }
+      // このMacは非アクティブになった（どのデバイスがアクティブかは送信側が管理）
+      DispatchQueue.main.async {
+        NetworkDeviceStore.shared.activeDeviceID = "other"
       }
       // Send success response
       send(message: DeviceCommand.operationSuccess.rawValue, to: connection)
