@@ -38,6 +38,7 @@ final class NetworkDeviceStore: ObservableObject, NetworkDeviceManageable {
   @Published private(set) var networkDevices: [NetworkDevice] = []
   @Published private(set) var discoveredNetworkDevices: [NetworkDevice] = []
   @AppStorage("networkDevices") private var networkDevicesData: Data = Data()
+  @AppStorage("activeDeviceID") var activeDeviceID: String = ""
 
   // MARK: - Computed Properties
 

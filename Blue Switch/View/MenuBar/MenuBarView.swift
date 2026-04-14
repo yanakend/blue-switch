@@ -51,11 +51,14 @@ final class MenuBarView: MenuBarPresentable {
   }
 
   private func addNetworkDeviceItems(to menu: NSMenu) {
+    let isSelfActive = bluetoothStore.isAllDevicesConnected
+
     let selfItem = NSMenuItem(
       title: Host.current().localizedName ?? "This Mac",
       action: #selector(AppDelegate.connectToSelf(_:)),
       keyEquivalent: ""
     )
+    selfItem.state = isSelfActive ? .on : .off
     menu.addItem(selfItem)
 
     for device in networkStore.networkDevices {
@@ -65,6 +68,8 @@ final class MenuBarView: MenuBarPresentable {
         keyEquivalent: ""
       )
       item.representedObject = device
+      item.state = (!isSelfActive && networkStore.activeDeviceID == device.id) ? .on : .off
+
       menu.addItem(item)
     }
   }

@@ -84,7 +84,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       guard let self = self else { return }
       if allDisconnected {
         self.networkStore.executeCommand(.connectAll, to: device) { success in
-          if !success {
+          if success {
+            self.networkStore.activeDeviceID = device.id
+          } else {
             NotificationManager.showNotification(
               title: "Error",
               body: "Connection process failed on \(device.name)"
@@ -105,6 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       networkStore.executeCommand(.unregisterAll, to: device) { _ in }
     }
     bluetoothStore.peripherals.forEach { bluetoothStore.connectPeripheral($0) }
+    networkStore.activeDeviceID = ""
   }
 
   private func handleLeftClick() {
